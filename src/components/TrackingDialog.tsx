@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TrackingDialogProps {
   isOpen: boolean;
@@ -22,24 +23,45 @@ const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: Trackin
   const [productData, setProductData] = useState<any>(null);
   const { toast } = useToast();
 
-  // Mock product data - in real app, this would be fetched by scraping the URL
-  const mockProductData = {
-    name: "Apple iPhone 13 - Refurbished",
-    image: "/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png",
-    currentPrice: 33799,
-    originalPrice: 69900,
-    discount: 52,
-    variant: "Cashify Warranty, Fair, 4 GB / 64 GB, Midnight Green"
-  };
-
   useEffect(() => {
     if (isOpen && productUrl) {
       setIsLoading(true);
-      // Simulate API call to scrape product data
-      setTimeout(() => {
-        setProductData(mockProductData);
+      setProductData(null);
+      
+      // Call the Supabase Edge Function to scrape product data
+      supabase.functions.invoke('scrape-product', {
+        body: { productUrl }
+      }).then(({ data, error }) => {
         setIsLoading(false);
-      }, 1500);
+        
+        if (error) {
+          console.error('Scraping error:', error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch product details. Please check the URL.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (data?.success) {
+          setProductData(data.data);
+        } else {
+          toast({
+            title: "Error",
+            description: data?.error || "Failed to scrape product data.",
+            variant: "destructive",
+          });
+        }
+      }).catch((err) => {
+        setIsLoading(false);
+        console.error('Function call error:', err);
+        toast({
+          title: "Error",
+          description: "Failed to connect to scraping service.",
+          variant: "destructive",
+        });
+      });
     }
   }, [isOpen, productUrl]);
 
@@ -106,20 +128,30 @@ const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: Trackin
                   src={productData.image}
                   alt={productData.name}
                   className="w-24 h-24 object-contain rounded-lg bg-gray-50"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png";
+                  }}
                 />
                 <div className="flex-1 space-y-2">
                   <h3 className="font-semibold text-slate-gray">{productData.name}</h3>
-                  <p className="text-sm text-gray-600">{productData.variant}</p>
+                  {productData.variant && (
+                    <p className="text-sm text-gray-600">{productData.variant}</p>
+                  )}
                   <div className="flex items-center space-x-2">
-                    <Badge variant="destructive" className="bg-rose-red">
-                      -{productData.discount}%
-                    </Badge>
+                    {productData.discount > 0 && (
+                      <Badge variant="destructive" className="bg-rose-red">
+                        -{productData.discount}%
+                      </Badge>
+                    )}
                     <span className="text-lg font-bold text-slate-gray">
                       {formatPrice(productData.currentPrice)}
                     </span>
-                    <span className="text-sm text-gray-500 line-through">
-                      {formatPrice(productData.originalPrice)}
-                    </span>
+                    {productData.originalPrice > productData.currentPrice && (
+                      <span className="text-sm text-gray-500 line-through">
+                        {formatPrice(productData.originalPrice)}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

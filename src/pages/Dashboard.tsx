@@ -84,7 +84,7 @@ const Dashboard = () => {
             <h1 className="text-2xl font-bold text-slate-gray">💰 CashiFracker</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-gray-600">email@example.com</span>
+            <span className="text-gray-600">user@example.com</span>
             <Button
               onClick={handleLogout}
               variant="outline"
