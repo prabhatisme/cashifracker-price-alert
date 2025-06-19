@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash, ArrowUp, ArrowDown, ExternalLink, LogOut } from "lucide-react";
+import { Trash, ArrowUp, ArrowDown, ExternalLink, LogOut, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import TrackingDialog from "@/components/TrackingDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useEmailNotifications } from "@/hooks/useEmailNotifications";
 import type { User } from "@supabase/supabase-js";
 
 interface TrackedProduct {
@@ -45,6 +46,7 @@ const Dashboard = () => {
   ]);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { sendPriceAlert } = useEmailNotifications();
 
   useEffect(() => {
     // Get initial session
@@ -86,6 +88,26 @@ const Dashboard = () => {
     toast({
       title: "Product Removed",
       description: "Product has been removed from tracking.",
+    });
+  };
+
+  const handleSendTestAlert = async (product: TrackedProduct) => {
+    if (!user?.email) {
+      toast({
+        title: "Email Required",
+        description: "User email not found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await sendPriceAlert({
+      userEmail: user.email,
+      productName: product.name,
+      currentPrice: product.currentPrice,
+      alertPrice: product.alertPrice || product.currentPrice,
+      productUrl: product.productUrl,
+      productImage: product.image
     });
   };
 
@@ -234,6 +256,16 @@ const Dashboard = () => {
                       >
                         <ExternalLink className="h-4 w-4" />
                         <span>View Product</span>
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-blue-indigo hover:text-blue-indigo hover:bg-blue-50"
+                        onClick={() => handleSendTestAlert(product)}
+                        title="Send test price alert email"
+                      >
+                        <Mail className="h-4 w-4" />
                       </Button>
                       
                       <Button
