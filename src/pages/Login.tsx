@@ -6,17 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     if (isSignUp) {
       if (password !== repeatPassword) {
@@ -25,20 +28,54 @@ const Login = () => {
           description: "Passwords do not match. Please try again.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
+      }
+
+      // Sign up with Supabase
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Sign Up Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Account Created!",
+          description: "Please check your email to verify your account.",
+        });
+      }
+    } else {
+      // Sign in with Supabase
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome Back!",
+          description: "You have been logged in successfully.",
+        });
+        navigate('/dashboard');
       }
     }
     
-    // Mock authentication - in real app, this would integrate with Supabase
-    toast({
-      title: isSignUp ? "Account Created!" : "Welcome Back!",
-      description: isSignUp ? "Your account has been created successfully." : "You have been logged in.",
-    });
-    
-    // Navigate to dashboard after successful auth
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1000);
+    setIsLoading(false);
   };
 
   return (
@@ -112,9 +149,10 @@ const Login = () => {
               
               <Button
                 type="submit"
-                className="w-full h-12 bg-gradient-to-r from-gradient-start to-gradient-end hover:from-blue-700 hover:to-blue-600 text-white font-medium text-base rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                disabled={isLoading}
+                className="w-full h-12 bg-gradient-to-r from-gradient-start to-gradient-end hover:from-blue-700 hover:to-blue-600 text-white font-medium text-base rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {isSignUp ? "SIGN UP" : "SIGN IN"}
+                {isLoading ? "Processing..." : (isSignUp ? "SIGN UP" : "SIGN IN")}
               </Button>
             </form>
             
@@ -122,6 +160,7 @@ const Login = () => {
               <button
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-blue-indigo hover:text-blue-700 font-medium transition-colors"
+                disabled={isLoading}
               >
                 {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
               </button>
