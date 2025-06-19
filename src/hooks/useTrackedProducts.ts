@@ -31,6 +31,28 @@ export const useTrackedProducts = (user: User | null) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  const formatLastChecked = (lastCheckedAt: string | null): string => {
+    if (!lastCheckedAt) {
+      return 'Pending first check';
+    }
+
+    const lastChecked = new Date(lastCheckedAt);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - lastChecked.getTime()) / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+
+    if (diffInMinutes < 1) {
+      return 'Just now';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} minutes ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    }
+  };
+
   const loadTrackedProducts = async () => {
     if (!user) {
       setTrackedProducts([]);
@@ -67,7 +89,7 @@ export const useTrackedProducts = (user: User | null) => {
           discount: productData?.discount || 0,
           lowestPrice: product.current_price || 0,
           highestPrice: productData?.originalPrice || product.current_price || 0,
-          lastChecked: product.last_checked_at ? new Date(product.last_checked_at).toLocaleString() : 'Never',
+          lastChecked: formatLastChecked(product.last_checked_at),
           alertPrice: product.alert_price,
           productUrl: product.product_url
         };
@@ -105,7 +127,7 @@ export const useTrackedProducts = (user: User | null) => {
           current_price: productData.currentPrice,
           alert_price: alertPrice,
           product_data: productData as any,
-          last_checked_at: new Date().toISOString()
+          last_checked_at: null // Will be updated by the cron job
         })
         .select()
         .single();
@@ -129,7 +151,7 @@ export const useTrackedProducts = (user: User | null) => {
         discount: productData.discount,
         lowestPrice: productData.currentPrice,
         highestPrice: productData.originalPrice,
-        lastChecked: "Just now",
+        lastChecked: "Pending first check",
         alertPrice: alertPrice,
         productUrl: productUrl
       };
@@ -138,7 +160,7 @@ export const useTrackedProducts = (user: User | null) => {
       
       toast({
         title: "Product Added! 🎉",
-        description: "Product has been added to your tracking list.",
+        description: "Product has been added to your tracking list. Price monitoring will begin with the next hourly check.",
       });
       
       return true;
@@ -187,6 +209,28 @@ export const useTrackedProducts = (user: User | null) => {
 
   useEffect(() => {
     loadTrackedProducts();
+    
+    // Set up real-time updates for price changes
+    const channel = supabase
+      .channel('tracked-products-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'tracked_products',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          // Reload products when price monitoring updates them
+          loadTrackedProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   return {
