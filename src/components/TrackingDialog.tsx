@@ -13,7 +13,7 @@ interface TrackingDialogProps {
   isOpen: boolean;
   onClose: () => void;
   productUrl: string;
-  onProductAdded: (product: any) => void;
+  onProductAdded: (productData: any, alertPrice: number) => void;
 }
 
 const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: TrackingDialogProps) => {
@@ -27,6 +27,8 @@ const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: Trackin
     if (isOpen && productUrl) {
       setIsLoading(true);
       setProductData(null);
+      setAlertPrice("");
+      setIsSuccess(false);
       
       // Call the Supabase Edge Function to scrape product data
       supabase.functions.invoke('scrape-product', {
@@ -65,7 +67,7 @@ const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: Trackin
     }
   }, [isOpen, productUrl]);
 
-  const handleSetAlert = () => {
+  const handleSetAlert = async () => {
     if (!alertPrice || parseFloat(alertPrice) <= 0) {
       toast({
         title: "Invalid Price",
@@ -75,30 +77,25 @@ const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: Trackin
       return;
     }
 
-    const newProduct = {
-      id: Date.now().toString(),
-      name: productData.name,
-      image: productData.image,
-      currentPrice: productData.currentPrice,
-      originalPrice: productData.originalPrice,
-      discount: productData.discount,
-      lowestPrice: productData.currentPrice,
-      highestPrice: productData.originalPrice,
-      lastChecked: "Just now",
-      alertPrice: parseFloat(alertPrice),
-      productUrl: productUrl
-    };
+    try {
+      await onProductAdded(productData, parseFloat(alertPrice));
+      setIsSuccess(true);
 
-    onProductAdded(newProduct);
-    setIsSuccess(true);
-
-    // Close dialog after success animation
-    setTimeout(() => {
-      setIsSuccess(false);
-      setAlertPrice("");
-      setProductData(null);
-      onClose();
-    }, 2000);
+      // Close dialog after success animation
+      setTimeout(() => {
+        setIsSuccess(false);
+        setAlertPrice("");
+        setProductData(null);
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add product to tracking.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;

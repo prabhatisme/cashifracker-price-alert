@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,44 +10,23 @@ import { useToast } from "@/hooks/use-toast";
 import TrackingDialog from "@/components/TrackingDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmailNotifications } from "@/hooks/useEmailNotifications";
+import { useTrackedProducts } from "@/hooks/useTrackedProducts";
 import type { User } from "@supabase/supabase-js";
-
-interface TrackedProduct {
-  id: string;
-  name: string;
-  image: string;
-  currentPrice: number;
-  originalPrice: number;
-  discount: number;
-  lowestPrice: number;
-  highestPrice: number;
-  lastChecked: string;
-  alertPrice?: number;
-  productUrl: string;
-}
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [productUrl, setProductUrl] = useState("");
   const [isTrackingDialogOpen, setIsTrackingDialogOpen] = useState(false);
-  const [trackedProducts, setTrackedProducts] = useState<TrackedProduct[]>([
-    {
-      id: "1",
-      name: "Apple iPhone 13 - Refurbished",
-      image: "/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png",
-      currentPrice: 33799,
-      originalPrice: 69900,
-      discount: 52,
-      lowestPrice: 32500,
-      highestPrice: 70000,
-      lastChecked: "20 mins ago",
-      alertPrice: 30000,
-      productUrl: "https://cashify.in/product/apple-iphone-13"
-    }
-  ]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { sendPriceAlert } = useEmailNotifications();
+  
+  const { 
+    trackedProducts, 
+    isLoading: productsLoading, 
+    addTrackedProduct, 
+    deleteTrackedProduct 
+  } = useTrackedProducts(user);
 
   useEffect(() => {
     // Get initial session
@@ -83,15 +63,15 @@ const Dashboard = () => {
     setIsTrackingDialogOpen(true);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    setTrackedProducts(prev => prev.filter(product => product.id !== id));
-    toast({
-      title: "Product Removed",
-      description: "Product has been removed from tracking.",
-    });
+  const handleProductAdded = async (productData: any, alertPrice: number) => {
+    const success = await addTrackedProduct(productData, alertPrice, productUrl);
+    if (success) {
+      setProductUrl("");
+      setIsTrackingDialogOpen(false);
+    }
   };
 
-  const handleSendTestAlert = async (product: TrackedProduct) => {
+  const handleSendTestAlert = async (product: any) => {
     if (!user?.email) {
       toast({
         title: "Email Required",
@@ -181,8 +161,16 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {productsLoading && (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-indigo mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your tracked products...</p>
+          </div>
+        )}
+
         {/* Tracked Products Grid */}
-        {trackedProducts.length > 0 && (
+        {!productsLoading && trackedProducts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trackedProducts.map((product) => (
               <Card key={product.id} className="shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 border-0 animate-fade-in">
@@ -272,7 +260,7 @@ const Dashboard = () => {
                         variant="outline"
                         size="sm"
                         className="text-rose-red hover:text-rose-red hover:bg-red-50"
-                        onClick={() => handleDeleteProduct(product.id)}
+                        onClick={() => deleteTrackedProduct(product.id)}
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -285,7 +273,7 @@ const Dashboard = () => {
         )}
 
         {/* Empty State */}
-        {trackedProducts.length === 0 && (
+        {!productsLoading && trackedProducts.length === 0 && (
           <div className="text-center py-16 animate-fade-in">
             <div className="text-6xl mb-4">📱</div>
             <h3 className="text-2xl font-semibold text-slate-gray mb-2">
@@ -303,10 +291,7 @@ const Dashboard = () => {
         isOpen={isTrackingDialogOpen}
         onClose={() => setIsTrackingDialogOpen(false)}
         productUrl={productUrl}
-        onProductAdded={(product) => {
-          setTrackedProducts(prev => [...prev, product]);
-          setProductUrl("");
-        }}
+        onProductAdded={handleProductAdded}
       />
     </div>
   );
