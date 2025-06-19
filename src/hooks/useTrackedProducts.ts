@@ -56,7 +56,7 @@ export const useTrackedProducts = (user: User | null) => {
       }
 
       const formattedProducts: TrackedProduct[] = data.map(product => {
-        const productData = product.product_data as ProductData;
+        const productData = product.product_data as any;
         
         return {
           id: product.id,
@@ -104,7 +104,7 @@ export const useTrackedProducts = (user: User | null) => {
           product_url: productUrl,
           current_price: productData.currentPrice,
           alert_price: alertPrice,
-          product_data: productData,
+          product_data: productData as any,
           last_checked_at: new Date().toISOString()
         })
         .select()
