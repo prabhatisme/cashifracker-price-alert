@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Trash, ArrowUp, ArrowDown, ExternalLink, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import TrackingDialog from "@/components/TrackingDialog";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 interface TrackedProduct {
   id: string;
@@ -24,6 +25,7 @@ interface TrackedProduct {
 }
 
 const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [productUrl, setProductUrl] = useState("");
   const [isTrackingDialogOpen, setIsTrackingDialogOpen] = useState(false);
   const [trackedProducts, setTrackedProducts] = useState<TrackedProduct[]>([
@@ -43,6 +45,28 @@ const Dashboard = () => {
   ]);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        navigate('/login');
+      }
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        navigate('/login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleTrackProduct = () => {
     if (!productUrl.includes('cashify.in')) {
@@ -65,7 +89,8 @@ const Dashboard = () => {
     });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     toast({
       title: "Logged Out",
       description: "You have been logged out successfully.",
@@ -74,6 +99,15 @@ const Dashboard = () => {
   };
 
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;
+
+  // Show loading state while checking authentication
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-light-gray flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-indigo"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-light-gray">
@@ -84,7 +118,7 @@ const Dashboard = () => {
             <h1 className="text-2xl font-bold text-slate-gray">💰 CashiFracker</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-gray-600">user@example.com</span>
+            <span className="text-gray-600">{user.email}</span>
             <Button
               onClick={handleLogout}
               variant="outline"
