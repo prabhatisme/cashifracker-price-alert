@@ -18,6 +18,14 @@ export interface TrackedProduct {
   productUrl: string;
 }
 
+interface ProductData {
+  name: string;
+  image: string;
+  currentPrice: number;
+  originalPrice: number;
+  discount: number;
+}
+
 export const useTrackedProducts = (user: User | null) => {
   const [trackedProducts, setTrackedProducts] = useState<TrackedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,19 +55,23 @@ export const useTrackedProducts = (user: User | null) => {
         return;
       }
 
-      const formattedProducts: TrackedProduct[] = data.map(product => ({
-        id: product.id,
-        name: product.product_data?.name || 'Unknown Product',
-        image: product.product_data?.image || '/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png',
-        currentPrice: product.current_price || 0,
-        originalPrice: product.product_data?.originalPrice || product.current_price || 0,
-        discount: product.product_data?.discount || 0,
-        lowestPrice: product.current_price || 0,
-        highestPrice: product.product_data?.originalPrice || product.current_price || 0,
-        lastChecked: product.last_checked_at ? new Date(product.last_checked_at).toLocaleString() : 'Never',
-        alertPrice: product.alert_price,
-        productUrl: product.product_url
-      }));
+      const formattedProducts: TrackedProduct[] = data.map(product => {
+        const productData = product.product_data as ProductData;
+        
+        return {
+          id: product.id,
+          name: productData?.name || 'Unknown Product',
+          image: productData?.image || '/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png',
+          currentPrice: product.current_price || 0,
+          originalPrice: productData?.originalPrice || product.current_price || 0,
+          discount: productData?.discount || 0,
+          lowestPrice: product.current_price || 0,
+          highestPrice: productData?.originalPrice || product.current_price || 0,
+          lastChecked: product.last_checked_at ? new Date(product.last_checked_at).toLocaleString() : 'Never',
+          alertPrice: product.alert_price,
+          productUrl: product.product_url
+        };
+      });
 
       setTrackedProducts(formattedProducts);
     } catch (error) {
@@ -74,7 +86,7 @@ export const useTrackedProducts = (user: User | null) => {
     }
   };
 
-  const addTrackedProduct = async (productData: any, alertPrice: number, productUrl: string) => {
+  const addTrackedProduct = async (productData: ProductData, alertPrice: number, productUrl: string) => {
     if (!user) {
       toast({
         title: "Authentication Required",
