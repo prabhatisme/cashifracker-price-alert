@@ -1,73 +1,218 @@
-# Welcome to your Lovable project
 
-## Project info
+# 💰 CashiFracker - Cashify Product Price Tracker
 
-**URL**: https://lovable.dev/projects/d816e44f-0de9-4796-bf6f-9046b67da51f
+A powerful web application that helps you track price drops on refurbished products from Cashify. Never miss a great deal again!
 
-## How can I edit this code?
+## 🎥 Demo Video
 
-There are several ways of editing your application.
+[![CashiFracker Demo](https://img.youtube.com/vi/RRXKS3itN0Y/0.jpg)](https://youtu.be/RRXKS3itN0Y)
 
-**Use Lovable**
+Watch the full demo: [https://youtu.be/RRXKS3itN0Y](https://youtu.be/RRXKS3itN0Y)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d816e44f-0de9-4796-bf6f-9046b67da51f) and start prompting.
+## ✨ Features
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🔍 Smart Product Tracking
+- **Easy URL Input**: Simply paste any Cashify product link to start tracking
+- **Real-time Price Monitoring**: Automated hourly price checks
+- **Price History**: Track lowest and highest prices over time
+- **Custom Price Alerts**: Set your desired price point and get notified
 
-**Use your preferred IDE**
+### 📧 Email Notifications
+- **Instant Alerts**: Get notified immediately when prices drop below your target
+- **Test Notifications**: Send test emails to verify your alert setup
+- **Beautiful Email Templates**: Professional-looking price alert emails
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🛡️ Secure & Personal
+- **User Authentication**: Secure login with Supabase Auth
+- **Private Tracking**: Your tracked products are completely private
+- **Row Level Security**: Database-level security ensures data isolation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 📱 Modern Interface
+- **Responsive Design**: Works perfectly on desktop and mobile
+- **Real-time Updates**: See changes instantly without page refreshes
+- **Intuitive Dashboard**: Clean, organized view of all your tracked products
 
-Follow these steps:
+## 🖼️ Screenshots
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Dashboard Overview
+![Dashboard](public/lovable-uploads/2df9fcda-ee94-490c-9de3-ae50146b5d60.png)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+*Main dashboard showing tracked products with price history, alerts, and last checked status*
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Product Tracking Dialog
+![Track Product Dialog](public/lovable-uploads/2116fcc7-de1b-4f68-b7e3-ca7ab4657aa6.png)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+*Easy product tracking setup with custom price alert configuration*
 
-**Edit a file directly in GitHub**
+## 🚀 Getting Started
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Prerequisites
 
-**Use GitHub Codespaces**
+- Node.js & npm ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+- Supabase account for backend services
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Installation
 
-## What technologies are used for this project?
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd <YOUR_PROJECT_NAME>
+   ```
 
-This project is built with:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+3. **Set up environment variables**
+   Create a `.env.local` file with your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-## How can I deploy this project?
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-Simply open [Lovable](https://lovable.dev/projects/d816e44f-0de9-4796-bf6f-9046b67da51f) and click on Share -> Publish.
+5. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-## Can I connect a custom domain to my Lovable project?
+## 🏗️ Tech Stack
 
-Yes, you can!
+### Frontend
+- **React 18** - Modern React with hooks
+- **TypeScript** - Type-safe development
+- **Vite** - Lightning-fast build tool
+- **Tailwind CSS** - Utility-first styling
+- **shadcn/ui** - Beautiful, accessible components
+- **React Router** - Client-side routing
+- **React Query** - Data fetching and caching
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Backend & Services
+- **Supabase** - Backend-as-a-Service
+  - Authentication
+  - PostgreSQL Database
+  - Real-time subscriptions
+  - Edge Functions
+  - Cron Jobs
+- **Edge Functions** - Serverless functions for:
+  - Web scraping Cashify products
+  - Price monitoring
+  - Email notifications
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Key Libraries
+- **Lucide React** - Beautiful icons
+- **React Hook Form** - Form management
+- **Zod** - Schema validation
+- **Cheerio** - Server-side HTML parsing
+- **Date-fns** - Date manipulation
+
+## 🔧 How It Works
+
+### 1. Product Tracking Setup
+- User pastes a Cashify product URL
+- System scrapes product details (name, price, image, etc.)
+- User sets a custom price alert threshold
+- Product is saved to user's private tracking list
+
+### 2. Automated Price Monitoring
+- Cron job runs every hour (`price-monitor-hourly`)
+- Scrapes current prices for all tracked products
+- Updates price history and statistics
+- Triggers email alerts when prices drop below thresholds
+
+### 3. Price History & Analytics
+- **Current Price**: Latest scraped price
+- **Lowest Price**: Historically lowest price seen
+- **Highest Price**: Historically highest price seen
+- **Discount**: Percentage off from original price
+- **Last Checked**: Timestamp of last price check
+
+### 4. Email Notifications
+- Automatic alerts when target price is reached
+- Manual test notifications to verify setup
+- Professional email templates with product images
+- Includes direct links to purchase
+
+## 📊 Database Schema
+
+### `tracked_products`
+- User's tracked products with current pricing
+- Price alert thresholds
+- Product metadata (name, image, URL)
+
+### `price_history`
+- Historical price data for trend analysis
+- Timestamps for price changes
+- Linked to tracked products
+
+### Row Level Security (RLS)
+- Users can only access their own data
+- System functions can update all records
+- Complete data isolation between users
+
+## 🔐 Security Features
+
+- **Authentication**: Secure user login/logout
+- **Row Level Security**: Database-level access control
+- **Data Isolation**: Each user's data is completely private
+- **Secure APIs**: All API calls are authenticated
+- **Input Validation**: Zod schemas validate all inputs
+
+## 🚀 Deployment
+
+### Quick Deploy with Lovable
+1. Open your [Lovable Project](https://lovable.dev/projects/d816e44f-0de9-4796-bf6f-9046b67da51f)
+2. Click **Share** → **Publish**
+3. Your app will be live at `yourapp.lovable.app`
+
+### Custom Domain
+1. Navigate to **Project** → **Settings** → **Domains**
+2. Click **Connect Domain**
+3. Follow the setup instructions
+
+*Note: Custom domains require a paid Lovable plan*
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🙋‍♂️ Support
+
+- **Lovable Community**: [Discord](https://discord.com/channels/1119885301872070706/1280461670979993613)
+- **Documentation**: [Lovable Docs](https://docs.lovable.dev/)
+- **Issues**: Please open an issue on this repository
+
+## 🔮 Future Enhancements
+
+- [ ] Price prediction using historical data
+- [ ] Multiple retailer support beyond Cashify
+- [ ] Mobile app version
+- [ ] Advanced filtering and sorting
+- [ ] Price drop percentage alerts
+- [ ] Wishlist sharing functionality
+- [ ] Browser extension for one-click tracking
+
+---
+
+**Made with ❤️ using [Lovable](https://lovable.dev) - The AI-powered web app builder**
+
+## 📈 Project Stats
+
+- **Framework**: React + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Backend**: Supabase (Auth, Database, Functions)
+- **Build Tool**: Vite
+- **Deployment**: Lovable Platform
+
+**Project URL**: https://lovable.dev/projects/d816e44f-0de9-4796-bf6f-9046b67da51f
