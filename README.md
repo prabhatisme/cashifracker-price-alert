@@ -35,7 +35,7 @@ Watch the full demo: [https://youtu.be/RRXKS3itN0Y](https://youtu.be/RRXKS3itN0Y
 ## 🖼️ Screenshots
 
 ### Dashboard Overview
-![Dashboard](public/lovable-uploads/2df9fcda-ee94-490c-9de3-ae50146b5d60.png)
+![Dashboard](public/lovable-uploads/1349570e-defd-4664-8644-ef0ca008cae0.png)
 
 *Main dashboard showing tracked products with price history, alerts, and last checked status*
 
