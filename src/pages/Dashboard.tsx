@@ -1,13 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash, ArrowUp, ArrowDown, ExternalLink, LogOut, Mail } from "lucide-react";
+import { Trash, ExternalLink, LogOut, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import TrackingDialog from "@/components/TrackingDialog";
+import { PriceTrend } from "@/components/PriceTrend";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmailNotifications } from "@/hooks/useEmailNotifications";
 import { useTrackedProducts } from "@/hooks/useTrackedProducts";
@@ -34,7 +34,7 @@ const Dashboard = () => {
       if (session?.user) {
         setUser(session.user);
       } else {
-        navigate('/login');
+        navigate('/');
       }
     });
 
@@ -43,7 +43,7 @@ const Dashboard = () => {
       if (session?.user) {
         setUser(session.user);
       } else {
-        navigate('/login');
+        navigate('/');
       }
     });
 
@@ -97,7 +97,7 @@ const Dashboard = () => {
       title: "Logged Out",
       description: "You have been logged out successfully.",
     });
-    navigate('/login');
+    navigate('/');
   };
 
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;
@@ -204,23 +204,13 @@ const Dashboard = () => {
                     </div>
                     
                     {/* Price History */}
+                    <PriceTrend
+                      currentPrice={product.currentPrice}
+                      lowestPrice={product.lowestPrice}
+                      highestPrice={product.highestPrice}
+                    />
+                    
                     <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-1 text-leaf-green">
-                          <ArrowDown className="h-4 w-4" />
-                          <span>Lowest Price:</span>
-                        </div>
-                        <span className="font-medium">{formatPrice(product.lowestPrice)}</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-1 text-rose-red">
-                          <ArrowUp className="h-4 w-4" />
-                          <span>Highest Price:</span>
-                        </div>
-                        <span className="font-medium">{formatPrice(product.highestPrice)}</span>
-                      </div>
-                      
                       <div className="flex items-center justify-between text-gray-500">
                         <span>🕓 Last Checked:</span>
                         <span>{product.lastChecked}</span>

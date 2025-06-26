@@ -16,6 +16,7 @@ export interface TrackedProduct {
   lastChecked: string;
   alertPrice?: number;
   productUrl: string;
+  priceHistory: Array<{ price: number; checked_at: string }>;
 }
 
 interface ProductData {
@@ -61,14 +62,15 @@ export const useTrackedProducts = (user: User | null) => {
     }
 
     try {
-      const { data, error } = await supabase
+      // First, get the tracked products
+      const { data: trackedProductsData, error: trackedProductsError } = await supabase
         .from('tracked_products')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error loading tracked products:', error);
+      if (trackedProductsError) {
+        console.error('Error loading tracked products:', trackedProductsError);
         toast({
           title: "Error",
           description: "Failed to load tracked products.",
@@ -77,23 +79,55 @@ export const useTrackedProducts = (user: User | null) => {
         return;
       }
 
-      const formattedProducts: TrackedProduct[] = data.map(product => {
-        const productData = product.product_data as any;
-        
-        return {
-          id: product.id,
-          name: productData?.name || 'Unknown Product',
-          image: productData?.image || '/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png',
-          currentPrice: product.current_price || 0,
-          originalPrice: productData?.originalPrice || product.current_price || 0,
-          discount: productData?.discount || 0,
-          lowestPrice: product.current_price || 0,
-          highestPrice: productData?.originalPrice || product.current_price || 0,
-          lastChecked: formatLastChecked(product.last_checked_at),
-          alertPrice: product.alert_price,
-          productUrl: product.product_url
-        };
-      });
+      // For each product, get its price history to calculate min/max prices
+      const formattedProducts: TrackedProduct[] = await Promise.all(
+        trackedProductsData.map(async (product) => {
+          const productData = product.product_data as any;
+          
+          // Get price history for this product
+          const { data: priceHistory, error: priceHistoryError } = await supabase
+            .from('price_history')
+            .select('price, checked_at')
+            .eq('tracked_product_id', product.id)
+            .order('checked_at', { ascending: false });
+
+          if (priceHistoryError) {
+            console.error('Error loading price history:', priceHistoryError);
+          }
+
+          // Calculate lowest and highest prices from history
+          let lowestPrice = product.current_price || 0;
+          let highestPrice = product.current_price || 0;
+          
+          if (priceHistory && priceHistory.length > 0) {
+            const prices = priceHistory.map(h => h.price).filter(p => p !== null);
+            if (prices.length > 0) {
+              lowestPrice = Math.min(...prices, product.current_price || 0);
+              highestPrice = Math.max(...prices, product.current_price || 0);
+            }
+          }
+
+          // If no price history exists yet, use original price as highest
+          if (priceHistory?.length === 0 && productData?.originalPrice) {
+            highestPrice = Math.max(productData.originalPrice, product.current_price || 0);
+          }
+
+          return {
+            id: product.id,
+            name: productData?.name || 'Unknown Product',
+            image: productData?.image || '/lovable-uploads/4725c5d8-11df-4675-aa0c-cad405db82ad.png',
+            currentPrice: product.current_price || 0,
+            originalPrice: productData?.originalPrice || product.current_price || 0,
+            discount: productData?.discount || 0,
+            lowestPrice,
+            highestPrice,
+            lastChecked: formatLastChecked(product.last_checked_at),
+            alertPrice: product.alert_price,
+            productUrl: product.product_url,
+            priceHistory: priceHistory || []
+          };
+        })
+      );
 
       setTrackedProducts(formattedProducts);
     } catch (error) {
@@ -153,7 +187,8 @@ export const useTrackedProducts = (user: User | null) => {
         highestPrice: productData.originalPrice,
         lastChecked: "Pending first check",
         alertPrice: alertPrice,
-        productUrl: productUrl
+        productUrl: productUrl,
+        priceHistory: []
       };
 
       setTrackedProducts(prev => [newProduct, ...prev]);
