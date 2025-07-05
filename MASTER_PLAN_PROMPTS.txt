@@ -1,0 +1,359 @@
+
+# 🚀 CashiFracker Master Plan - AI Prompts for Building Similar Projects
+
+This document contains a comprehensive set of prompts that can be used with AI coding assistants to build a price tracking application similar to CashiFracker from scratch.
+
+## 📋 Phase 1: Project Setup and Foundation
+
+### Prompt 1: Initial Project Setup
+```
+Create a new React + TypeScript project using Vite with the following requirements:
+- Configure Tailwind CSS for styling
+- Set up shadcn/ui component library
+- Install React Router for navigation
+- Add React Query for data fetching
+- Configure ESLint and TypeScript strict mode
+- Create a clean folder structure with src/components, src/pages, src/hooks, src/lib
+- Set up a basic landing page with modern gradient styling
+```
+
+### Prompt 2: Authentication Setup
+```
+Set up user authentication using Supabase:
+- Install and configure @supabase/supabase-js
+- Create login/signup forms with email and password
+- Implement protected routes that require authentication
+- Add logout functionality
+- Create user session management
+- Style the authentication pages with a modern design using Tailwind CSS
+- Add proper error handling and loading states
+```
+
+### Prompt 3: Database Schema Design
+```
+Design and create Supabase database tables for a price tracking application:
+- Create 'tracked_products' table with columns: id, user_id, product_url, current_price, alert_price, product_data (JSONB), created_at, last_checked_at
+- Create 'price_history' table with columns: id, tracked_product_id, price, checked_at
+- Set up Row Level Security (RLS) policies to ensure users only see their own data
+- Create proper foreign key relationships between tables
+- Add indexes for performance optimization
+```
+
+## 📊 Phase 2: Core Features Development
+
+### Prompt 4: Product Tracking Interface
+```
+Create a dashboard page with the following features:
+- Display user's tracked products in a responsive grid layout
+- Show product name, image, current price, and alert price for each product
+- Add a "Track New Product" button that opens a dialog
+- Create a form to add new products by URL with price alert settings
+- Implement real-time updates using Supabase subscriptions
+- Add loading states and empty states with proper UI feedback
+- Style everything with modern design principles using shadcn/ui components
+```
+
+### Prompt 5: Web Scraping Edge Function
+```
+Create a Supabase Edge Function for web scraping product data:
+- Install cheerio for HTML parsing
+- Create a function that accepts a product URL and returns product details
+- Extract product name, current price, original price, and image URL
+- Handle different e-commerce site structures (focus on one platform initially)
+- Add error handling for invalid URLs or scraping failures
+- Return structured data that matches the database schema
+- Add CORS headers for frontend integration
+```
+
+### Prompt 6: Price Monitoring System
+```
+Create an automated price monitoring system:
+- Build a Supabase Edge Function that runs on a schedule (cron job)
+- Fetch all tracked products from the database
+- Scrape current prices for each product
+- Update the database with new prices and add entries to price history
+- Compare current prices with user alert thresholds
+- Return a list of products that triggered price alerts
+- Add comprehensive error handling and logging
+```
+
+## 📧 Phase 3: Notification System
+
+### Prompt 7: Email Notification Setup
+```
+Implement email notifications using Resend API:
+- Create a Supabase Edge Function for sending emails
+- Design an HTML email template for price drop alerts
+- Include product image, name, old price, new price, and direct purchase link
+- Set up proper email styling that works across email clients
+- Add error handling for failed email deliveries
+- Create a test notification feature for users to verify their email setup
+```
+
+### Prompt 8: Alert Management
+```
+Create alert management features:
+- Add functionality to edit alert prices for existing products
+- Implement bulk actions (delete multiple products, change alert prices)
+- Create a notification preferences page
+- Add the ability to pause/resume alerts for specific products
+- Show alert history with timestamps
+- Add price trend indicators (↑ ↓ ➡️) based on recent price changes
+```
+
+## 📈 Phase 4: Analytics and Insights
+
+### Prompt 9: Price History Visualization
+```
+Add price history charts and analytics:
+- Install recharts library for data visualization
+- Create line charts showing price trends over time
+- Display key statistics: lowest price, highest price, average price
+- Add price drop percentage calculations
+- Show savings potential based on price history
+- Create interactive charts with hover effects and zoom capabilities
+- Make charts responsive for different screen sizes
+```
+
+### Prompt 10: Advanced Dashboard Features
+```
+Enhance the dashboard with advanced features:
+- Add search and filter functionality for tracked products
+- Implement sorting options (by price, date added, savings potential)
+- Create product categories and tagging system
+- Add bulk import/export functionality for product lists
+- Show user statistics (total tracked, total savings, active alerts)
+- Implement pagination for large product lists
+- Add keyboard shortcuts for power users
+```
+
+## 🔧 Phase 5: User Experience Enhancements
+
+### Prompt 11: Mobile Optimization
+```
+Optimize the application for mobile devices:
+- Make all components fully responsive using Tailwind breakpoints
+- Implement mobile-first design patterns
+- Add touch-friendly interactions and gestures
+- Optimize loading times for mobile networks
+- Create a mobile-optimized navigation menu
+- Add Progressive Web App (PWA) capabilities
+- Implement offline functionality for viewing tracked products
+```
+
+### Prompt 12: Performance Optimization
+```
+Implement performance optimizations:
+- Add React.memo to prevent unnecessary re-renders
+- Implement virtualization for large product lists
+- Add image lazy loading and optimization
+- Create skeleton loading states for better perceived performance
+- Implement code splitting and lazy loading for routes
+- Add service worker for caching strategies
+- Optimize bundle size and reduce dependencies where possible
+```
+
+## 🛡️ Phase 6: Security and Reliability
+
+### Prompt 13: Security Hardening
+```
+Implement comprehensive security measures:
+- Add input validation and sanitization for all user inputs
+- Implement rate limiting for API endpoints
+- Add CSRF protection and secure headers
+- Validate and sanitize all URLs before scraping
+- Add proper error handling that doesn't expose sensitive information
+- Implement audit logging for user actions
+- Add security headers and HTTPS enforcement
+```
+
+### Prompt 14: Error Handling and Monitoring
+```
+Create robust error handling and monitoring:
+- Implement global error boundaries in React
+- Add comprehensive logging for all Edge Functions
+- Create user-friendly error messages and fallback UIs
+- Add retry mechanisms for failed operations
+- Implement health checks for all services
+- Create monitoring dashboards for system health
+- Add alerting for critical system failures
+```
+
+## 🎨 Phase 7: UI/UX Polish
+
+### Prompt 15: Design System Implementation
+```
+Create a consistent design system:
+- Define color palette, typography, and spacing scales
+- Create reusable component variants using class-variance-authority
+- Implement dark/light theme support
+- Add smooth animations and micro-interactions
+- Create loading animations and progress indicators
+- Design empty states and error states
+- Ensure accessibility compliance (WCAG guidelines)
+```
+
+### Prompt 16: Advanced UI Features
+```
+Add advanced user interface features:
+- Implement drag-and-drop for reordering products
+- Add context menus and keyboard shortcuts
+- Create customizable dashboard layouts
+- Add quick actions and shortcuts
+- Implement undo/redo functionality for critical actions
+- Add tour/onboarding flow for new users
+- Create help documentation and tooltips
+```
+
+## 🚀 Phase 8: Advanced Features
+
+### Prompt 17: Multi-Platform Support
+```
+Extend the system to support multiple e-commerce platforms:
+- Create an abstract scraping interface that can handle different sites
+- Implement platform-specific scrapers (Amazon, eBay, etc.)
+- Add platform detection based on URL patterns
+- Create unified product data models
+- Implement platform-specific rate limiting and request headers
+- Add configuration for different scraping rules per platform
+```
+
+### Prompt 18: Social and Sharing Features
+```
+Add social features to the application:
+- Create public wishlist sharing functionality
+- Add deal sharing to social media platforms
+- Implement user reviews and ratings for deals
+- Create a community deals page with trending products
+- Add following/followers system for deal hunters
+- Implement deal voting and popularity rankings
+- Create email newsletters with best deals of the week
+```
+
+## 📱 Phase 9: Mobile App and Extensions
+
+### Prompt 19: Browser Extension
+```
+Create a browser extension for easy product tracking:
+- Build a Chrome/Firefox extension that detects product pages
+- Add one-click tracking functionality from any e-commerce site
+- Show price history overlay on product pages
+- Add price alert setup directly from the extension
+- Sync data with the main web application
+- Add context menu integration for quick actions
+```
+
+### Prompt 20: API and Integrations
+```
+Create a public API for third-party integrations:
+- Design RESTful API endpoints for all core functionality
+- Implement API authentication using JWT tokens
+- Add rate limiting and usage quotas for API users
+- Create comprehensive API documentation
+- Add webhook support for real-time notifications
+- Create SDKs for popular programming languages
+- Implement GraphQL endpoint for flexible data queries
+```
+
+## 🔮 Phase 10: Advanced Analytics and AI
+
+### Prompt 21: Machine Learning Integration
+```
+Add AI-powered features to enhance user experience:
+- Implement price prediction using historical data and LSTM models
+- Create personalized product recommendations based on user behavior
+- Add intelligent deal scoring and ranking algorithms
+- Implement anomaly detection for unusual price patterns
+- Create chatbot for customer support using OpenAI API
+- Add natural language search for products
+- Implement automated deal discovery based on user preferences
+```
+
+### Prompt 22: Advanced Analytics Dashboard
+```
+Create comprehensive analytics and reporting:
+- Build admin dashboard with system-wide metrics
+- Add user behavior analytics and insights
+- Create revenue/savings reports for users
+- Implement A/B testing framework for feature experimentation
+- Add conversion tracking and funnel analysis
+- Create automated report generation and email delivery
+- Add data export functionality in various formats (CSV, PDF, JSON)
+```
+
+## 🌐 Phase 11: Enterprise and Scaling
+
+### Prompt 23: Multi-tenant Architecture
+```
+Design enterprise-ready multi-tenant system:
+- Implement tenant isolation at database and application level
+- Add custom branding and white-labeling capabilities
+- Create hierarchical user management within organizations
+- Implement role-based access control (RBAC)
+- Add tenant-specific configuration and settings
+- Create billing and subscription management
+- Add enterprise SSO integration (SAML, OAuth)
+```
+
+### Prompt 24: Infrastructure and DevOps
+```
+Set up production-ready infrastructure:
+- Create Docker containers for all services
+- Set up CI/CD pipelines for automated deployment
+- Implement infrastructure as code using Terraform
+- Add monitoring and logging with ELK stack or similar
+- Set up auto-scaling and load balancing
+- Create disaster recovery and backup strategies
+- Implement blue/green deployment strategies
+```
+
+## 📚 Documentation and Testing
+
+### Prompt 25: Testing Strategy
+```
+Implement comprehensive testing suite:
+- Create unit tests for all business logic using Jest
+- Add integration tests for API endpoints and database operations
+- Implement end-to-end tests using Playwright or Cypress
+- Create visual regression tests for UI components
+- Add performance testing for high-load scenarios
+- Implement security testing and vulnerability scanning
+- Create test data factories and fixtures
+```
+
+### Prompt 26: Documentation and Deployment
+```
+Create comprehensive documentation and deployment guides:
+- Write detailed README with setup instructions
+- Create API documentation using OpenAPI/Swagger
+- Add component library documentation using Storybook
+- Create user guides and tutorials
+- Write deployment guides for different platforms
+- Add troubleshooting guides and FAQ
+- Create video tutorials and demos
+```
+
+---
+
+## 🎯 Usage Instructions
+
+1. **Sequential Development**: Use these prompts in order for a structured development approach
+2. **Customization**: Modify prompts based on your specific requirements and target platforms
+3. **Iteration**: Each prompt can be broken down further into smaller, more specific tasks
+4. **Testing**: Always test each phase thoroughly before moving to the next
+5. **Documentation**: Keep documentation updated as you progress through each phase
+
+## 💡 Tips for Success
+
+- Start with a simple MVP and gradually add features
+- Focus on user experience and feedback early and often
+- Implement proper error handling and monitoring from the beginning
+- Use TypeScript strictly to catch errors early
+- Keep components small and focused on single responsibilities
+- Test extensively, especially scraping functionality which can be fragile
+- Plan for scale from the beginning but don't over-engineer early features
+- Consider legal implications of web scraping and respect robots.txt files
+
+---
+
+**Note**: These prompts are designed to work with AI coding assistants like GPT-4, Claude, or similar tools. Each prompt should be used as a starting point and may need refinement based on specific requirements and the AI assistant's capabilities.
