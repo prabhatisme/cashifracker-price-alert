@@ -1,4 +1,3 @@
-
 # 💰 CashiFracker - Cashify Product Price Tracker
 
 A powerful web application that helps you track price drops on refurbished products from Cashify. Never miss a great deal again!
@@ -43,6 +42,11 @@ Watch the full demo: [https://youtu.be/RRXKS3itN0Y](https://youtu.be/RRXKS3itN0Y
 ![Track Product Dialog](public/lovable-uploads/2116fcc7-de1b-4f68-b7e3-ca7ab4657aa6.png)
 
 *Easy product tracking setup with custom price alert configuration*
+
+### Email Notification Example
+![Email Notification](public/lovable-uploads/55abe79a-423c-4b1c-815a-c74989b3a740.png)
+
+*Professional email alert when your target price is reached*
 
 ## 🚀 Getting Started
 
@@ -175,6 +179,54 @@ Watch the full demo: [https://youtu.be/RRXKS3itN0Y](https://youtu.be/RRXKS3itN0Y
 
 *Note: Custom domains require a paid Lovable plan*
 
+## 🔮 Future Improvements
+
+### 🎯 Short-term Enhancements (0-3 months)
+- [ ] **Enhanced Input Validation**: Comprehensive URL validation and sanitization
+- [ ] **Rate Limiting**: Implement API rate limiting to prevent abuse
+- [ ] **Error Boundaries**: Better error handling with user-friendly messages  
+- [ ] **Loading States**: Improved loading indicators and skeleton screens
+- [ ] **Mobile Optimization**: Enhanced mobile responsiveness and PWA features
+- [ ] **Email Templates**: More customizable and branded email designs
+- [ ] **Price Trend Visualization**: Interactive charts showing price history
+
+### 📈 Medium-term Features (3-6 months)
+- [ ] **Multi-platform Support**: Track products from Amazon, Flipkart, and other retailers
+- [ ] **Advanced Filtering**: Filter tracked products by category, price range, discount percentage
+- [ ] **Bulk Actions**: Select and manage multiple products simultaneously
+- [ ] **Export Data**: Export price history and tracked products to CSV/PDF
+- [ ] **Social Sharing**: Share great deals with friends and family
+- [ ] **Wishlist Groups**: Organize products into custom categories/folders
+- [ ] **Price Prediction**: ML-based price forecasting using historical data
+- [ ] **Browser Extension**: One-click product tracking from any website
+
+### 🚀 Long-term Vision (6+ months)
+- [ ] **Mobile App**: Native iOS and Android applications
+- [ ] **API for Developers**: Public API for third-party integrations
+- [ ] **Community Features**: User reviews, ratings, and deal recommendations
+- [ ] **Advanced Analytics**: Comprehensive price trends and market insights
+- [ ] **International Support**: Track products from global retailers
+- [ ] **AI-Powered Insights**: Smart recommendations based on user behavior
+- [ ] **Multi-language Support**: Localization for different regions
+- [ ] **Enterprise Features**: Team accounts and bulk tracking for businesses
+
+### 🛠️ Technical Improvements
+- [ ] **Performance Optimization**: Implement caching, CDN, and database indexing
+- [ ] **Monitoring & Logging**: Comprehensive application monitoring and error tracking
+- [ ] **Automated Testing**: Unit, integration, and E2E test coverage
+- [ ] **CI/CD Pipeline**: Automated deployment and quality checks
+- [ ] **Database Scaling**: Implement sharding and read replicas for high traffic
+- [ ] **Microservices Architecture**: Break down monolithic functions into services
+- [ ] **Real-time Analytics**: Live dashboard for system health and usage metrics
+
+### 🎨 UX/UI Enhancements
+- [ ] **Dark Mode**: Toggle between light and dark themes
+- [ ] **Accessibility**: WCAG compliance and screen reader support
+- [ ] **Animations**: Smooth transitions and micro-interactions
+- [ ] **Keyboard Shortcuts**: Power user features for quick navigation
+- [ ] **Customizable Dashboard**: Drag-and-drop layout and widget customization
+- [ ] **Advanced Search**: Full-text search across product names and descriptions
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -193,20 +245,6 @@ This project is open source and available under the [MIT License](LICENSE).
 - **Documentation**: [Lovable Docs](https://docs.lovable.dev/)
 - **Issues**: Please open an issue on this repository
 
-## 🔮 Future Enhancements
-
-- [ ] Price prediction using historical data
-- [ ] Multiple retailer support beyond Cashify
-- [ ] Mobile app version
-- [ ] Advanced filtering and sorting
-- [ ] Price drop percentage alerts
-- [ ] Wishlist sharing functionality
-- [ ] Browser extension for one-click tracking
-
----
-
-**Made with ❤️ using [Lovable](https://lovable.dev) - The AI-powered web app builder**
-
 ## 📈 Project Stats
 
 - **Framework**: React + TypeScript
@@ -216,3 +254,7 @@ This project is open source and available under the [MIT License](LICENSE).
 - **Deployment**: Lovable Platform
 
 **Project URL**: https://lovable.dev/projects/d816e44f-0de9-4796-bf6f-9046b67da51f
+
+---
+
+**Made with ❤️ using [Lovable](https://lovable.dev) - The AI-powered web app builder**
