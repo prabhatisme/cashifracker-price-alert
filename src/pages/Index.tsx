@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialAuth } from "@/components/SocialAuth";
 import type { User } from "@supabase/supabase-js";
 
 const Index = () => {
@@ -116,34 +117,47 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-light-gray to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-light-gray to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-gray mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-gray dark:text-white mb-4">
             💰 CashiFracker
           </h1>
-          <p className="text-xl text-gray-600 mb-2">
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-2">
             Track Refurbished Tech Deals
           </p>
-          <p className="text-lg text-gray-500">
+          <p className="text-lg text-gray-500 dark:text-gray-400">
             Never Miss a Drop.
           </p>
         </div>
 
-        <Card className="shadow-xl border-0">
+        <Card className="shadow-xl border-0 dark:bg-gray-800">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-slate-gray">
+            <CardTitle className="text-2xl font-bold text-slate-gray dark:text-white">
               {isSignUp ? "Start your journey" : "Welcome back"}
             </CardTitle>
-            <p className="text-gray-600 font-medium">
+            <p className="text-gray-600 dark:text-gray-300 font-medium">
               {isSignUp ? "Sign Up to CashiFracker" : "Sign In to CashiFracker"}
             </p>
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="space-y-6">
+            <SocialAuth />
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-gray font-medium">
+                <Label htmlFor="email" className="text-slate-gray dark:text-gray-200 font-medium">
                   Email address
                 </Label>
                 <Input
@@ -158,7 +172,7 @@ const Index = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-gray font-medium">
+                <Label htmlFor="password" className="text-slate-gray dark:text-gray-200 font-medium">
                   Password
                 </Label>
                 <Input
@@ -174,7 +188,7 @@ const Index = () => {
               
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="repeatPassword" className="text-slate-gray font-medium">
+                  <Label htmlFor="repeatPassword" className="text-slate-gray dark:text-gray-200 font-medium">
                     Repeat password
                   </Label>
                   <Input

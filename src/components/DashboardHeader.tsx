@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserAvatar } from "@/components/UserAvatar";
 import type { User } from "@supabase/supabase-js";
 
 interface DashboardHeaderProps {
@@ -23,11 +25,8 @@ export const DashboardHeader = ({ user, onLogout }: DashboardHeaderProps) => {
             </h1>
           </div>
           <div className="flex items-center space-x-2">
-            {!isMobile && (
-              <span className="text-muted-foreground text-sm">
-                {user.email}
-              </span>
-            )}
+            <ThemeToggle />
+            <UserAvatar user={user} />
             <Button
               onClick={onLogout}
               variant="outline"
