@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -229,15 +228,11 @@ const Dashboard = () => {
                     </div>
                     
                     {/* Actions */}
-                    <div className={`flex pt-4 ${
-                      isMobile ? 'flex-col space-y-2' : 'space-x-2'
-                    }`}>
+                    <div className="flex space-x-2 pt-4">
                       <Button
                         variant="outline"
                         size="sm"
-                        className={`flex items-center justify-center space-x-1 ${
-                          isMobile ? 'w-full' : 'flex-1'
-                        }`}
+                        className="flex items-center justify-center space-x-1 flex-1"
                         onClick={() => window.open(product.productUrl, '_blank')}
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -247,9 +242,7 @@ const Dashboard = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${
-                          isMobile ? 'w-full' : ''
-                        }`}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => deleteTrackedProduct(product.id)}
                       >
                         <Trash className="h-4 w-4" />
