@@ -41,6 +41,7 @@ const Dashboard = () => {
       if (session?.user) {
         setUser(session.user);
       } else {
+        setUser(null);
         navigate('/');
       }
     });
@@ -70,12 +71,30 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully.",
-    });
-    navigate('/');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast({
+          title: "Logout Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Logged Out",
+          description: "You have been logged out successfully.",
+        });
+        // Force navigation to home page
+        navigate('/', { replace: true });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout Error",
+        description: "An unexpected error occurred during logout.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Show loading state while checking authentication
