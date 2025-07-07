@@ -62,16 +62,7 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				'blue-indigo': '#3B82F6',
-				'gradient-start': '#2563EB',
-				'gradient-end': '#3B82F6',
-				'light-gray': '#F8FAFC',
-				'slate-gray': '#0F172A',
-				'leaf-green': '#10B981',
-				'rose-red': '#EF4444',
-				'warm-yellow': '#FEF3C7',
-				'soft-blue': '#EBF8FF'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

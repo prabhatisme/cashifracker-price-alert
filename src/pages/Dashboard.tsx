@@ -116,7 +116,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile-Optimized Top Bar */}
+      {/* Top Bar */}
       <div className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -147,7 +147,7 @@ const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Mobile-Optimized Header Section */}
+        {/* Header Section */}
         <div className="text-center mb-8 sm:mb-12 animate-fade-in">
           <h2 className={`font-bold text-foreground mb-4 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
             Your Refurb Deal Tracker
@@ -156,7 +156,7 @@ const Dashboard = () => {
             Paste any Cashify product link to begin tracking price drops.
           </p>
           
-          {/* Mobile-Optimized Product URL Input */}
+          {/* Product URL Input */}
           <div className="max-w-2xl mx-auto">
             <div className={`flex gap-2 sm:gap-4 ${isMobile ? 'flex-col' : 'flex-row'}`}>
               <Input
@@ -169,7 +169,7 @@ const Dashboard = () => {
               />
               <Button
                 onClick={handleTrackProduct}
-                className={`bg-gradient-to-r from-gradient-start to-gradient-end hover:from-blue-700 hover:to-blue-600 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl ${
+                className={`bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl ${
                   isMobile ? 'h-12 text-base' : 'h-14 px-8 text-lg'
                 }`}
               >
@@ -187,20 +187,20 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Mobile-Optimized Tracked Products Grid */}
+        {/* Tracked Products Grid */}
         {!productsLoading && trackedProducts.length > 0 && (
           <div className={`grid gap-4 sm:gap-6 ${
             isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
           }`}>
             {trackedProducts.map((product) => (
-              <Card key={product.id} className="shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 border-0 animate-fade-in bg-warm-yellow">
+              <Card key={product.id} className="shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 border animate-fade-in">
                 <CardContent className={`${isMobile ? 'p-4' : 'p-6'}`}>
                   {/* Product Image */}
                   <div className="mb-4">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className={`w-full object-contain rounded-lg bg-white/80 ${
+                      className={`w-full object-contain rounded-lg bg-muted ${
                         isMobile ? 'h-32' : 'h-48'
                       }`}
                     />
@@ -216,7 +216,7 @@ const Dashboard = () => {
                     
                     {/* Price Section */}
                     <div className="flex items-center space-x-2 flex-wrap">
-                      <Badge variant="destructive" className="bg-rose-red">
+                      <Badge variant="destructive" className="bg-destructive">
                         -{product.discount}%
                       </Badge>
                       <span className={`font-bold text-foreground ${
@@ -250,7 +250,7 @@ const Dashboard = () => {
                       )}
                     </div>
                     
-                    {/* Mobile-Optimized Actions */}
+                    {/* Actions */}
                     <div className={`flex pt-4 ${
                       isMobile ? 'flex-col space-y-2' : 'space-x-2'
                     }`}>
@@ -270,7 +270,7 @@ const Dashboard = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className={`text-primary hover:text-primary hover:bg-blue-50 ${
+                          className={`text-primary hover:text-primary hover:bg-primary/10 ${
                             isMobile ? 'flex-1' : ''
                           }`}
                           onClick={() => handleSendTestAlert(product)}
@@ -283,7 +283,7 @@ const Dashboard = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className={`text-rose-red hover:text-rose-red hover:bg-red-50 ${
+                          className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${
                             isMobile ? 'flex-1' : ''
                           }`}
                           onClick={() => deleteTrackedProduct(product.id)}
