@@ -178,8 +178,8 @@ const Dashboard = () => {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className={`w-full object-contain rounded-lg bg-muted ${
-                        isMobile ? 'h-32' : 'h-48'
+                      className={`w-full object-contain rounded-lg bg-white ${
+                        isMobile ? 'h-48' : 'h-64'
                       }`}
                     />
                   </div>
