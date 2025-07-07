@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash, ExternalLink, LogOut, Mail, Menu } from "lucide-react";
+import { Trash, ExternalLink, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import TrackingDialog from "@/components/TrackingDialog";
 import { PriceTrend } from "@/components/PriceTrend";
 import { supabase } from "@/integrations/supabase/client";
-import { useEmailNotifications } from "@/hooks/useEmailNotifications";
 import { useTrackedProducts } from "@/hooks/useTrackedProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { User } from "@supabase/supabase-js";
@@ -21,7 +20,6 @@ const Dashboard = () => {
   const [isTrackingDialogOpen, setIsTrackingDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { sendPriceAlert } = useEmailNotifications();
   const isMobile = useIsMobile();
   
   const { 
@@ -72,26 +70,6 @@ const Dashboard = () => {
       setProductUrl("");
       setIsTrackingDialogOpen(false);
     }
-  };
-
-  const handleSendTestAlert = async (product: any) => {
-    if (!user?.email) {
-      toast({
-        title: "Email Required",
-        description: "User email not found.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await sendPriceAlert({
-      userEmail: user.email,
-      productName: product.name,
-      currentPrice: product.currentPrice,
-      alertPrice: product.alertPrice || product.currentPrice,
-      productUrl: product.productUrl,
-      productImage: product.image
-    });
   };
 
   const handleLogout = async () => {
@@ -266,32 +244,17 @@ const Dashboard = () => {
                         <span>View Product</span>
                       </Button>
                       
-                      <div className={`flex ${isMobile ? 'space-x-2' : 'space-x-2'}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`text-primary hover:text-primary hover:bg-primary/10 ${
-                            isMobile ? 'flex-1' : ''
-                          }`}
-                          onClick={() => handleSendTestAlert(product)}
-                          title="Send test price alert email"
-                        >
-                          <Mail className="h-4 w-4" />
-                          {isMobile && <span className="ml-1">Test Alert</span>}
-                        </Button>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${
-                            isMobile ? 'flex-1' : ''
-                          }`}
-                          onClick={() => deleteTrackedProduct(product.id)}
-                        >
-                          <Trash className="h-4 w-4" />
-                          {isMobile && <span className="ml-1">Delete</span>}
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${
+                          isMobile ? 'w-full' : ''
+                        }`}
+                        onClick={() => deleteTrackedProduct(product.id)}
+                      >
+                        <Trash className="h-4 w-4" />
+                        {isMobile && <span className="ml-1">Delete</span>}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
