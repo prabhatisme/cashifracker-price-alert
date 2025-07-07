@@ -105,7 +105,7 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center space-x-2">
               {!isMobile && (
-                <span className="text-muted-foreground text-sm truncate max-w-32">
+                <span className="text-muted-foreground text-sm">
                   {user.email}
                 </span>
               )}
