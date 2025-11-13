@@ -56,7 +56,12 @@ serve(async (req) => {
     
     // Get the image src from the img element
     const imageElement = $('img.w-full.h-auto.aspect-square.object-contain')
-    const image = imageElement.attr('src') || imageElement.attr('alt') || ''
+    let image = imageElement.attr('data-src') || imageElement.attr('src') || ''
+    
+    // Remove blur and size parameters to get full resolution image
+    if (image) {
+      image = image.split('?')[0]
+    }
     
     // Get current price
     const currentPriceText = $('span.h1[itemprop="price"]').text().trim()
