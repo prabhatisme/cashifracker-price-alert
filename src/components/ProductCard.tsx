@@ -1,10 +1,23 @@
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash, ExternalLink } from "lucide-react";
+import { Trash, ExternalLink, Edit } from "lucide-react";
 import { PriceTrend } from "@/components/PriceTrend";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TrackedProduct {
   id: string;
@@ -23,12 +36,54 @@ interface TrackedProduct {
 interface ProductCardProps {
   product: TrackedProduct;
   onDelete: (id: string) => void;
+  onUpdate?: () => void;
 }
 
-export const ProductCard = ({ product, onDelete }: ProductCardProps) => {
+export const ProductCard = ({ product, onDelete, onUpdate }: ProductCardProps) => {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [newAlertPrice, setNewAlertPrice] = useState(product.alertPrice?.toString() || "");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;
+
+  const handleEditAlert = async () => {
+    setIsUpdating(true);
+    const alertPrice = parseInt(newAlertPrice);
+
+    if (isNaN(alertPrice) || alertPrice <= 0) {
+      toast({
+        title: "Invalid Price",
+        description: "Please enter a valid alert price.",
+        variant: "destructive",
+      });
+      setIsUpdating(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from('tracked_products')
+      .update({ alert_price: alertPrice })
+      .eq('id', product.id);
+
+    if (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Alert Updated",
+        description: `Alert price set to ${formatPrice(alertPrice)}`,
+      });
+      setIsEditDialogOpen(false);
+      if (onUpdate) onUpdate();
+    }
+
+    setIsUpdating(false);
+  };
 
   return (
     <Card className="shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 border animate-fade-in">
@@ -79,7 +134,20 @@ export const ProductCard = ({ product, onDelete }: ProductCardProps) => {
             {product.alertPrice && (
               <div className="flex items-center justify-between text-primary font-medium">
                 <span>🔔 Alert at:</span>
-                <span>{formatPrice(product.alertPrice)}</span>
+                <div className="flex items-center space-x-2">
+                  <span>{formatPrice(product.alertPrice)}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => {
+                      setNewAlertPrice(product.alertPrice?.toString() || "");
+                      setIsEditDialogOpen(true);
+                    }}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -107,6 +175,40 @@ export const ProductCard = ({ product, onDelete }: ProductCardProps) => {
           </div>
         </div>
       </CardContent>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Alert Price</DialogTitle>
+            <DialogDescription>
+              Set a new price alert for this product. You'll be notified when the price drops below this amount.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="alertPrice">Alert Price (₹)</Label>
+              <Input
+                id="alertPrice"
+                type="number"
+                placeholder="Enter alert price"
+                value={newAlertPrice}
+                onChange={(e) => setNewAlertPrice(e.target.value)}
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Current price: {formatPrice(product.currentPrice)}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditAlert} disabled={isUpdating}>
+              {isUpdating ? "Updating..." : "Update Alert"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

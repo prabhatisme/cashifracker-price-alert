@@ -23,7 +23,8 @@ const Dashboard = () => {
     trackedProducts, 
     isLoading: productsLoading, 
     addTrackedProduct, 
-    deleteTrackedProduct 
+    deleteTrackedProduct,
+    refreshProducts
   } = useTrackedProducts(user);
 
   useEffect(() => {
@@ -123,6 +124,7 @@ const Dashboard = () => {
           <ProductGrid
             products={trackedProducts}
             onDeleteProduct={deleteTrackedProduct}
+            onUpdateProduct={refreshProducts}
           />
         )}
 

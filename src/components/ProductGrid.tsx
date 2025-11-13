@@ -19,9 +19,10 @@ interface TrackedProduct {
 interface ProductGridProps {
   products: TrackedProduct[];
   onDeleteProduct: (id: string) => void;
+  onUpdateProduct?: () => void;
 }
 
-export const ProductGrid = ({ products, onDeleteProduct }: ProductGridProps) => {
+export const ProductGrid = ({ products, onDeleteProduct, onUpdateProduct }: ProductGridProps) => {
   const isMobile = useIsMobile();
 
   return (
@@ -31,8 +32,9 @@ export const ProductGrid = ({ products, onDeleteProduct }: ProductGridProps) => 
       {products.map((product) => (
         <ProductCard
           key={product.id}
-          product={product}
-          onDelete={onDeleteProduct}
+            product={product}
+            onDelete={onDeleteProduct}
+            onUpdate={onUpdateProduct}
         />
       ))}
     </div>
