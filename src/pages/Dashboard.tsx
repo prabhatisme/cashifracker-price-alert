@@ -10,6 +10,7 @@ import { ProductUrlInput } from "@/components/ProductUrlInput";
 import { ProductGrid } from "@/components/ProductGrid";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingState } from "@/components/LoadingState";
+import { RefreshImagesButton } from "@/components/RefreshImagesButton";
 import type { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -112,11 +113,16 @@ const Dashboard = () => {
       <DashboardHeader user={user} onLogout={handleLogout} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <ProductUrlInput
-          productUrl={productUrl}
-          onProductUrlChange={setProductUrl}
-          onTrackProduct={handleTrackProduct}
-        />
+        <div className="flex justify-between items-start gap-4 mb-6">
+          <div className="flex-1">
+            <ProductUrlInput
+              productUrl={productUrl}
+              onProductUrlChange={setProductUrl}
+              onTrackProduct={handleTrackProduct}
+            />
+          </div>
+          {trackedProducts.length > 0 && <RefreshImagesButton />}
+        </div>
 
         {productsLoading && <LoadingState />}
 
