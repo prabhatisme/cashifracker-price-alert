@@ -7,6 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialAuth } from "@/components/SocialAuth";
+import { z } from "zod";
+
+const emailSchema = z.string().email("Invalid email address").max(255, "Email too long");
+const passwordSchema = z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long");
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,7 +26,19 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
+    // Validate email
+    const emailValidation = emailSchema.safeParse(email);
+    if (!emailValidation.success) {
+      toast({
+        title: "Invalid Email",
+        description: emailValidation.error.issues[0].message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     if (isForgotPassword) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
@@ -41,6 +58,18 @@ const Login = () => {
         setIsForgotPassword(false);
       }
     } else if (isSignUp) {
+      // Validate password
+      const passwordValidation = passwordSchema.safeParse(password);
+      if (!passwordValidation.success) {
+        toast({
+          title: "Invalid Password",
+          description: passwordValidation.error.issues[0].message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (password !== repeatPassword) {
         toast({
           title: "Password Mismatch",
@@ -72,6 +101,18 @@ const Login = () => {
         });
       }
     } else {
+      // Validate password for sign in
+      const passwordValidation = passwordSchema.safeParse(password);
+      if (!passwordValidation.success) {
+        toast({
+          title: "Invalid Password",
+          description: passwordValidation.error.issues[0].message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,

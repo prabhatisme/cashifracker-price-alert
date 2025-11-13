@@ -9,6 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialAuth } from "@/components/SocialAuth";
 import type { User } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const emailSchema = z.string().email("Invalid email address").max(255, "Email too long");
+const passwordSchema = z.string().min(6, "Password must be at least 6 characters").max(128, "Password too long");
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -51,6 +55,18 @@ const Index = () => {
     e.preventDefault();
     setIsAuthLoading(true);
     
+    // Validate email
+    const emailValidation = emailSchema.safeParse(email);
+    if (!emailValidation.success) {
+      toast({
+        title: "Invalid Email",
+        description: emailValidation.error.issues[0].message,
+        variant: "destructive",
+      });
+      setIsAuthLoading(false);
+      return;
+    }
+    
     if (isForgotPassword) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
@@ -70,6 +86,18 @@ const Index = () => {
         setIsForgotPassword(false);
       }
     } else if (isSignUp) {
+      // Validate password
+      const passwordValidation = passwordSchema.safeParse(password);
+      if (!passwordValidation.success) {
+        toast({
+          title: "Invalid Password",
+          description: passwordValidation.error.issues[0].message,
+          variant: "destructive",
+        });
+        setIsAuthLoading(false);
+        return;
+      }
+
       if (password !== repeatPassword) {
         toast({
           title: "Password Mismatch",
@@ -102,6 +130,18 @@ const Index = () => {
         });
       }
     } else {
+      // Validate password for sign in
+      const passwordValidation = passwordSchema.safeParse(password);
+      if (!passwordValidation.success) {
+        toast({
+          title: "Invalid Password",
+          description: passwordValidation.error.issues[0].message,
+          variant: "destructive",
+        });
+        setIsAuthLoading(false);
+        return;
+      }
+
       // Sign in with Supabase
       const { error } = await supabase.auth.signInWithPassword({
         email,

@@ -1,6 +1,16 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { Resend } from "npm:resend@2.0.0"
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts"
+
+const priceAlertSchema = z.object({
+  userEmail: z.string().email().max(255),
+  productName: z.string().min(1).max(500),
+  currentPrice: z.number().positive().max(10000000),
+  alertPrice: z.number().positive().max(10000000),
+  productUrl: z.string().url().max(2048),
+  productImage: z.string().url().max(2048).optional()
+})
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"))
 
@@ -25,9 +35,23 @@ serve(async (req) => {
   }
 
   try {
-    const { userEmail, productName, currentPrice, alertPrice, productUrl, productImage }: PriceAlertRequest = await req.json()
+    const requestData = await req.json()
+    
+    // Validate input data
+    const validationResult = priceAlertSchema.safeParse(requestData)
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data', details: validationResult.error.issues }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
-    console.log('Sending price alert to:', userEmail, 'for product:', productName)
+    const { userEmail, productName, currentPrice, alertPrice, productUrl, productImage } = validationResult.data
+
+    console.log('Sending price alert for product:', productName)
 
     const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`
 

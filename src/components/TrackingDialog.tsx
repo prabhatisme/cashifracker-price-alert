@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const priceSchema = z.number().positive("Price must be positive").max(10000000, "Price too high");
 
 interface TrackingDialogProps {
   isOpen: boolean;
@@ -68,10 +71,14 @@ const TrackingDialog = ({ isOpen, onClose, productUrl, onProductAdded }: Trackin
   }, [isOpen, productUrl]);
 
   const handleSetAlert = async () => {
-    if (!alertPrice || parseFloat(alertPrice) <= 0) {
+    const price = parseFloat(alertPrice);
+    
+    // Validate price with zod schema
+    const validationResult = priceSchema.safeParse(price);
+    if (!validationResult.success) {
       toast({
         title: "Invalid Price",
-        description: "Please enter a valid alert price.",
+        description: validationResult.error.issues[0].message,
         variant: "destructive",
       });
       return;

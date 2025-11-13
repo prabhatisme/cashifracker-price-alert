@@ -1,11 +1,10 @@
-
 project_id = "fsoqhhqbtmessubsxhsp"
 
 [functions.scrape-product]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-price-alert]
-verify_jwt = false
+verify_jwt = true
 
 [functions.price-monitor]
-verify_jwt = false
+verify_jwt = true
