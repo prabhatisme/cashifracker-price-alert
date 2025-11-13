@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Trash, ExternalLink, Edit } from "lucide-react";
 import { PriceTrend } from "@/components/PriceTrend";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { z } from "zod";
+
+const priceSchema = z.number().positive("Price must be positive").max(10000000, "Price too high");
 import {
   Dialog,
   DialogContent,
@@ -52,10 +55,12 @@ export const ProductCard = ({ product, onDelete, onUpdate }: ProductCardProps) =
     setIsUpdating(true);
     const alertPrice = parseInt(newAlertPrice);
 
-    if (isNaN(alertPrice) || alertPrice <= 0) {
+    // Validate price with zod schema
+    const validationResult = priceSchema.safeParse(alertPrice);
+    if (!validationResult.success) {
       toast({
         title: "Invalid Price",
-        description: "Please enter a valid alert price.",
+        description: validationResult.error.issues[0].message,
         variant: "destructive",
       });
       setIsUpdating(false);

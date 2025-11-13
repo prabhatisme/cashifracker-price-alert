@@ -2,6 +2,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { load } from "https://esm.sh/cheerio@1.0.0-rc.12"
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts"
+
+const urlSchema = z.string().url().max(2048).regex(/^https:\/\/.*cashify\.in\//, {
+  message: "URL must be a valid Cashify.in product page"
+})
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,9 +22,11 @@ serve(async (req) => {
   try {
     const { productUrl } = await req.json()
     
-    if (!productUrl || !productUrl.includes('cashify.in')) {
+    // Validate URL with zod schema
+    const validationResult = urlSchema.safeParse(productUrl)
+    if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ error: 'Invalid Cashify URL' }),
+        JSON.stringify({ error: 'Invalid Cashify URL', details: validationResult.error.issues[0].message }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
