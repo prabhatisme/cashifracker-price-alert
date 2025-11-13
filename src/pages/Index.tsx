@@ -14,6 +14,7 @@ const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -50,7 +51,25 @@ const Index = () => {
     e.preventDefault();
     setIsAuthLoading(true);
     
-    if (isSignUp) {
+    if (isForgotPassword) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+
+      if (error) {
+        toast({
+          title: "Password Reset Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Please check your email for the password reset link.",
+        });
+        setIsForgotPassword(false);
+      }
+    } else if (isSignUp) {
       if (password !== repeatPassword) {
         toast({
           title: "Password Mismatch",
@@ -134,10 +153,10 @@ const Index = () => {
         <Card className="shadow-xl border-0 dark:bg-gray-800">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-slate-gray dark:text-white">
-              {isSignUp ? "Start your journey" : "Welcome back"}
+              {isForgotPassword ? "Reset Password" : (isSignUp ? "Start your journey" : "Welcome back")}
             </CardTitle>
             <p className="text-gray-600 dark:text-gray-300 font-medium">
-              {isSignUp ? "Sign Up to CashiFracker" : "Sign In to CashiFracker"}
+              {isForgotPassword ? "Enter your email to receive a reset link" : (isSignUp ? "Sign Up to CashiFracker" : "Sign In to CashiFracker")}
             </p>
           </CardHeader>
           
@@ -171,22 +190,24 @@ const Index = () => {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-gray dark:text-gray-200 font-medium">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12 border-gray-300 focus:border-blue-indigo focus:ring-blue-indigo"
-                />
-              </div>
+              {!isForgotPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-slate-gray dark:text-gray-200 font-medium">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="h-12 border-gray-300 focus:border-blue-indigo focus:ring-blue-indigo"
+                  />
+                </div>
+              )}
               
-              {isSignUp && (
+              {isSignUp && !isForgotPassword && (
                 <div className="space-y-2">
                   <Label htmlFor="repeatPassword" className="text-slate-gray dark:text-gray-200 font-medium">
                     Repeat password
@@ -203,23 +224,45 @@ const Index = () => {
                 </div>
               )}
               
+              {!isSignUp && !isForgotPassword && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-sm text-blue-indigo hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
+              
               <Button
                 type="submit"
                 disabled={isAuthLoading}
                 className="w-full h-12 bg-gradient-to-r from-gradient-start to-gradient-end hover:from-blue-700 hover:to-blue-600 text-white font-medium text-base rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {isAuthLoading ? "Processing..." : (isSignUp ? "SIGN UP" : "SIGN IN")}
+                {isAuthLoading ? "Processing..." : (isForgotPassword ? "SEND RESET LINK" : (isSignUp ? "SIGN UP" : "SIGN IN"))}
               </Button>
             </form>
             
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-blue-indigo hover:text-blue-700 font-medium transition-colors"
-                disabled={isAuthLoading}
-              >
-                {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-              </button>
+            <div className="mt-6 text-center space-y-2">
+              {isForgotPassword ? (
+                <button
+                  onClick={() => setIsForgotPassword(false)}
+                  className="text-blue-indigo hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                  disabled={isAuthLoading}
+                >
+                  Back to sign in
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-blue-indigo hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                  disabled={isAuthLoading}
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
