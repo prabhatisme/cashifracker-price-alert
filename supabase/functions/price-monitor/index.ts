@@ -1,7 +1,40 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { load } from "https://esm.sh/cheerio@1.0.0-rc.12"
+
+// --- JSON-LD helpers (kept in-file since edge functions can't share imports) ---
+function toNumber(v: unknown): number {
+  if (v == null) return 0
+  if (typeof v === 'number') return Math.round(v)
+  const n = parseFloat(String(v).replace(/[₹,\s]/g, ''))
+  return Number.isFinite(n) ? Math.round(n) : 0
+}
+
+function extractCurrentPrice(html: string): number {
+  const $ = load(html)
+  const scripts = $('script[type="application/ld+json"]').toArray()
+  for (const s of scripts) {
+    const raw = $(s).contents().text().trim()
+    if (!raw) continue
+    let parsed: any
+    try { parsed = JSON.parse(raw) } catch { continue }
+    const entries = Array.isArray(parsed) ? parsed : [parsed]
+    for (const entry of entries) {
+      const graph = entry?.['@graph'] ? entry['@graph'] : [entry]
+      for (const node of graph) {
+        const type = node?.['@type']
+        const isProduct = type === 'Product' || (Array.isArray(type) && type.includes('Product'))
+        if (isProduct && node.offers) {
+          const offers = Array.isArray(node.offers) ? node.offers[0] : node.offers
+          const price = toNumber(offers?.price ?? offers?.lowPrice)
+          if (price > 0) return price
+        }
+      }
+    }
+  }
+  return 0
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,7 +76,9 @@ serve(async (req) => {
         // Scrape current price
         const response = await fetch(product.product_url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
           }
         })
 
@@ -53,11 +88,9 @@ serve(async (req) => {
         }
 
         const html = await response.text()
-        const $ = load(html)
 
-        // Scrape current price using the same selectors as the scrape-product function
-        const currentPriceText = $('span.h1[itemprop="price"]').text().trim()
-        const currentPrice = parseInt(currentPriceText.replace(/[₹,]/g, '')) || 0
+        // Extract current price from JSON-LD (robust to layout changes)
+        const currentPrice = extractCurrentPrice(html)
 
         if (currentPrice > 0 && currentPrice !== product.current_price) {
           console.log(`Price changed for product ${shortId(product.id)}: ${product.current_price} -> ${currentPrice}`)
