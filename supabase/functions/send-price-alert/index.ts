@@ -51,7 +51,9 @@ serve(async (req) => {
 
     const { userEmail, productName, currentPrice, alertPrice, productUrl, productImage } = validationResult.data
 
-    console.log('Sending price alert for product:', productName)
+    // Mask email for logging (PII protection)
+    const maskedEmail = userEmail.replace(/(.{2}).*(@.*)/, '$1***$2')
+    console.log('Sending price alert to:', maskedEmail)
 
     const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`
 
@@ -102,7 +104,7 @@ serve(async (req) => {
       `,
     })
 
-    console.log("Price alert email sent successfully:", emailResponse)
+    console.log("Price alert email sent successfully")
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
@@ -113,9 +115,10 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error("Error sending price alert email:", error)
+    // Log generic error server-side without sensitive context
+    console.error("Error sending price alert email:", error instanceof Error ? error.message : 'Unknown error')
     return new Response(
-      JSON.stringify({ error: "Failed to send price alert email", details: error.message }),
+      JSON.stringify({ error: "Failed to send price alert email" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -33,9 +33,12 @@ serve(async (req) => {
 
     console.log(`Found ${trackedProducts?.length || 0} tracked products`)
 
+    // Hash identifier for logs (PII protection): only first 8 chars of UUID
+    const shortId = (id: string) => id?.substring(0, 8) ?? 'unknown'
+
     for (const product of trackedProducts || []) {
       try {
-        console.log(`Checking product: ${product.product_url}`)
+        console.log(`Checking product ${shortId(product.id)}`)
 
         // Scrape current price
         const response = await fetch(product.product_url, {
@@ -45,7 +48,7 @@ serve(async (req) => {
         })
 
         if (!response.ok) {
-          console.log(`Failed to fetch ${product.product_url}: ${response.status}`)
+          console.log(`Failed to fetch product ${shortId(product.id)}: ${response.status}`)
           continue
         }
 
@@ -57,7 +60,8 @@ serve(async (req) => {
         const currentPrice = parseInt(currentPriceText.replace(/[₹,]/g, '')) || 0
 
         if (currentPrice > 0 && currentPrice !== product.current_price) {
-          console.log(`Price changed for product ${product.id}: ${product.current_price} -> ${currentPrice}`)
+          console.log(`Price changed for product ${shortId(product.id)}: ${product.current_price} -> ${currentPrice}`)
+
 
           // Update tracked product with new price
           await supabase
@@ -79,7 +83,7 @@ serve(async (req) => {
 
           // Check if price dropped below alert price and send email
           if (product.alert_price && currentPrice <= product.alert_price) {
-            console.log(`Price alert triggered for product ${product.id}`)
+            console.log(`Price alert triggered for product ${shortId(product.id)}`)
             
             // Get user email
             const { data: userData } = await supabase.auth.admin.getUserById(product.user_id)
@@ -114,7 +118,7 @@ serve(async (req) => {
         await new Promise(resolve => setTimeout(resolve, 1000))
 
       } catch (error) {
-        console.error(`Error checking product ${product.id}:`, error)
+        console.error(`Error checking product ${shortId(product.id)}:`, error instanceof Error ? error.message : 'Unknown error')
       }
     }
 
@@ -129,9 +133,9 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Price monitoring error:', error)
+    console.error('Price monitoring error:', error instanceof Error ? error.message : 'Unknown error')
     return new Response(
-      JSON.stringify({ error: 'Failed to monitor prices', details: error.message }),
+      JSON.stringify({ error: 'Failed to monitor prices' }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
