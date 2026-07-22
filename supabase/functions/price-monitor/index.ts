@@ -1,7 +1,40 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { load } from "https://esm.sh/cheerio@1.0.0-rc.12"
+
+// --- JSON-LD helpers (kept in-file since edge functions can't share imports) ---
+function toNumber(v: unknown): number {
+  if (v == null) return 0
+  if (typeof v === 'number') return Math.round(v)
+  const n = parseFloat(String(v).replace(/[₹,\s]/g, ''))
+  return Number.isFinite(n) ? Math.round(n) : 0
+}
+
+function extractCurrentPrice(html: string): number {
+  const $ = load(html)
+  const scripts = $('script[type="application/ld+json"]').toArray()
+  for (const s of scripts) {
+    const raw = $(s).contents().text().trim()
+    if (!raw) continue
+    let parsed: any
+    try { parsed = JSON.parse(raw) } catch { continue }
+    const entries = Array.isArray(parsed) ? parsed : [parsed]
+    for (const entry of entries) {
+      const graph = entry?.['@graph'] ? entry['@graph'] : [entry]
+      for (const node of graph) {
+        const type = node?.['@type']
+        const isProduct = type === 'Product' || (Array.isArray(type) && type.includes('Product'))
+        if (isProduct && node.offers) {
+          const offers = Array.isArray(node.offers) ? node.offers[0] : node.offers
+          const price = toNumber(offers?.price ?? offers?.lowPrice)
+          if (price > 0) return price
+        }
+      }
+    }
+  }
+  return 0
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
