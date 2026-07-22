@@ -10,8 +10,37 @@ function toNumber(v: unknown): number {
   return Number.isFinite(n) ? Math.round(n) : 0
 }
 
-function extractCurrentPrice(html: string): number {
+function cleanProductTitle(title: string): string {
+  return title
+    .replace(/\s+/g, ' ')
+    .replace(/^Certified Refurbished\s+/i, '')
+    .replace(/\s*\|\s*6-Month Warranty\s*\|\s*Cashify\s*$/i, '')
+    .trim()
+}
+
+function pickFirstImage(img: unknown): string {
+  if (!img) return ''
+  if (typeof img === 'string') return img.split('?')[0]
+  if (Array.isArray(img) && img.length) return pickFirstImage(img[0])
+  if (typeof img === 'object' && img !== null && 'url' in (img as any)) {
+    return pickFirstImage((img as any).url)
+  }
+  return ''
+}
+
+function extractProductData(html: string): { name: string; image: string; currentPrice: number; originalPrice: number } {
   const $ = load(html)
+  let name = cleanProductTitle(
+    $('[itemprop="name"]').first().text().trim()
+      || $('h1').first().text().trim()
+      || $('meta[property="og:title"]').attr('content')?.trim()
+      || $('title').first().text().trim()
+      || ''
+  )
+  let image = ''
+  let currentPrice = toNumber($('span.h1[itemprop="price"]').first().text())
+  let originalPrice = toNumber($('h6.subtitle1.line-through.text-surface-text').first().text())
+
   const scripts = $('script[type="application/ld+json"]').toArray()
   for (const s of scripts) {
     const raw = $(s).contents().text().trim()
@@ -27,12 +56,27 @@ function extractCurrentPrice(html: string): number {
         if (isProduct && node.offers) {
           const offers = Array.isArray(node.offers) ? node.offers[0] : node.offers
           const price = toNumber(offers?.price ?? offers?.lowPrice)
-          if (price > 0) return price
+          if (!name && node.name) name = cleanProductTitle(node.name)
+          if (!image) image = pickFirstImage(node.image)
+          if (!currentPrice && price > 0) currentPrice = price
+
+          const specs = Array.isArray(offers?.priceSpecification)
+            ? offers.priceSpecification
+            : offers?.priceSpecification
+            ? [offers.priceSpecification]
+            : []
+          for (const spec of specs) {
+            const priceType: string = spec?.priceType ?? ''
+            if (!originalPrice && priceType.toLowerCase().includes('listprice')) {
+              originalPrice = toNumber(spec.price)
+            }
+          }
         }
       }
     }
   }
-  return 0
+
+  return { name, image, currentPrice, originalPrice }
 }
 
 
@@ -89,8 +133,21 @@ serve(async (req) => {
 
         const html = await response.text()
 
-        // Extract current price from JSON-LD (robust to layout changes)
-        const currentPrice = extractCurrentPrice(html)
+        // Extract current product data from visible markup first, with JSON-LD fallback.
+        const scrapedProduct = extractProductData(html)
+        const currentPrice = scrapedProduct.currentPrice
+        const currentProductData = (product.product_data ?? {}) as Record<string, unknown>
+        const updatedProductData = {
+          ...currentProductData,
+          ...(scrapedProduct.name ? { name: scrapedProduct.name } : {}),
+          ...(scrapedProduct.image ? { image: scrapedProduct.image } : {}),
+          ...(scrapedProduct.originalPrice ? { originalPrice: scrapedProduct.originalPrice } : {}),
+          ...(currentPrice ? { currentPrice } : {}),
+          discount:
+            scrapedProduct.originalPrice > 0 && currentPrice > 0 && scrapedProduct.originalPrice >= currentPrice
+              ? Math.round(((scrapedProduct.originalPrice - currentPrice) / scrapedProduct.originalPrice) * 100)
+              : (currentProductData.discount as number | undefined) ?? 0,
+        }
 
         if (currentPrice > 0 && currentPrice !== product.current_price) {
           console.log(`Price changed for product ${shortId(product.id)}: ${product.current_price} -> ${currentPrice}`)
@@ -101,6 +158,7 @@ serve(async (req) => {
             .from('tracked_products')
             .update({
               current_price: currentPrice,
+              product_data: updatedProductData,
               last_checked_at: new Date().toISOString()
             })
             .eq('id', product.id)
@@ -142,6 +200,7 @@ serve(async (req) => {
           await supabase
             .from('tracked_products')
             .update({
+              product_data: updatedProductData,
               last_checked_at: new Date().toISOString()
             })
             .eq('id', product.id)

@@ -43,6 +43,30 @@ function pickFirstImage(img: unknown): string {
   return ''
 }
 
+function cleanProductTitle(title: string): string {
+  return title
+    .replace(/\s+/g, ' ')
+    .replace(/^Certified Refurbished\s+/i, '')
+    .replace(/\s*\|\s*6-Month Warranty\s*\|\s*Cashify\s*$/i, '')
+    .trim()
+}
+
+function extractFromVisiblePage(html: string): Partial<ScrapedProduct> {
+  const $ = load(html)
+  const name = cleanProductTitle(
+    $('[itemprop="name"]').first().text().trim()
+      || $('h1').first().text().trim()
+      || $('meta[property="og:title"]').attr('content')?.trim()
+      || $('title').first().text().trim()
+      || ''
+  )
+
+  const currentPrice = toNumber($('span.h1[itemprop="price"]').first().text())
+  const originalPrice = toNumber($('h6.subtitle1.line-through.text-surface-text').first().text())
+
+  return { name, currentPrice, originalPrice }
+}
+
 function extractFromLdJson(html: string): Partial<ScrapedProduct> | null {
   const $ = load(html)
   const scripts = $('script[type="application/ld+json"]').toArray()
@@ -113,11 +137,12 @@ export async function scrapeCashifyProduct(productUrl: string): Promise<ScrapedP
   const html = await response.text()
 
   const ld = extractFromLdJson(html) ?? {}
+  const visible = extractFromVisiblePage(html)
 
-  const name = (ld.name ?? '').trim() || 'Unknown Product'
+  const name = (visible.name ?? ld.name ?? '').trim() || 'Unknown Product'
   const image = ld.image ?? ''
-  const currentPrice = ld.currentPrice ?? 0
-  const originalPrice = ld.originalPrice ?? 0
+  const currentPrice = visible.currentPrice || ld.currentPrice || 0
+  const originalPrice = visible.originalPrice || ld.originalPrice || 0
   const discount =
     originalPrice > 0 && currentPrice > 0 && originalPrice >= currentPrice
       ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
