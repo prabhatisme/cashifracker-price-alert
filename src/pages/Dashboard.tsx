@@ -12,6 +12,11 @@ import { EmptyState } from "@/components/EmptyState";
 import { LoadingState } from "@/components/LoadingState";
 import { RefreshImagesButton } from "@/components/RefreshImagesButton";
 import type { User } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const cashifyUrlSchema = z.string().url().max(2048).regex(/^https:\/\/(www\.)?cashify\.in\//, {
+  message: "URL must be a valid Cashify.in product page"
+});
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -52,15 +57,16 @@ const Dashboard = () => {
   }, [navigate]);
 
   const handleTrackProduct = () => {
-    if (!productUrl.includes('cashify.in')) {
+    const validation = cashifyUrlSchema.safeParse(productUrl);
+    if (!validation.success) {
       toast({
         title: "Invalid URL",
-        description: "Please enter a valid Cashify product URL.",
+        description: validation.error.issues[0].message,
         variant: "destructive",
       });
       return;
     }
-    
+
     setIsTrackingDialogOpen(true);
   };
 

@@ -34,7 +34,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('Scraping product URL:', productUrl)
+    console.log('Scraping product request received')
 
     // Fetch the product page
     const response = await fetch(productUrl, {
@@ -83,7 +83,7 @@ serve(async (req) => {
       discount: discount
     }
 
-    console.log('Scraped product data:', productData)
+    console.log('Scraped product successfully:', productData.name)
 
     return new Response(
       JSON.stringify({ success: true, data: productData }),
@@ -94,9 +94,9 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Scraping error:', error)
+    console.error('Scraping error:', error instanceof Error ? error.message : 'Unknown error')
     return new Response(
-      JSON.stringify({ error: 'Failed to scrape product data', details: error.message }),
+      JSON.stringify({ error: 'Failed to scrape product data' }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
